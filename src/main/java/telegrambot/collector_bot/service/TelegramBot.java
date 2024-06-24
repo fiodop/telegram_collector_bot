@@ -18,6 +18,7 @@ import telegrambot.collector_bot.repository.BotMessagesEN;
 import telegrambot.collector_bot.repository.BotMessagesRU;
 import telegrambot.collector_bot.repository.ChatState;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -396,6 +397,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
             case SAVING_DEBT -> {
                 Debt cachedDebt = debtCache.get(chatId);
+                cachedDebt.setDateTime(ZonedDateTime.now());
                 debtService.addNewDebt(cachedDebt);
                 if (isEnglish) {
                     sendMessage(chatId, BotMessagesEN.ADDED_DEBT);
