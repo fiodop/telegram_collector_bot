@@ -11,7 +11,7 @@ public interface BotMessagesRU {
     Это удобный инструмент для поддержания финансовой дисциплины и своевременного возврата средств.
     """;
 
-    String SEND_DEBT_DESCRIBTION = "Отправьте описание долга (если его нет, то '-')";
+    String SEND_DEBT_DESCRIBTION = "Отправьте описание долга";
     String SEND_DEBT_SUM = "Отправьте сумму долга";
     String DEBT_DELETED = "Долг успешно удален";
     String SEND_USERNAME = "Отправьте @username должника";
@@ -30,5 +30,8 @@ public interface BotMessagesRU {
                                Сумма: %d
                                Валюта: %s
                                Описание: %s
+                               Уведомления: %s
                             """;
+    String NOTIFICATIONS_ABLED = "Уведомления включены";
+    String NOTIFICATIONS_DISABLED = "Уведомления выключены";
 }

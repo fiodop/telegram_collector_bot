@@ -5,5 +5,5 @@ import telegrambot.collector_bot.entity.DebtOwner;
 
 public interface DebtOwnerRepository extends JpaRepository<DebtOwner, Integer> {
     DebtOwner findByTelegramUsername(String telegramUsername);
-
+    long count();
 }

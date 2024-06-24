@@ -85,6 +85,19 @@ public class TelegramBot extends TelegramLongPollingBot {
                         handleStatefulMessage(update);
                         break;
 
+                    case "Пропустить", "Skip":
+                        Debt cachedDebt = debtCache.get(chatId);
+                        cachedDebt.setDebtDescription(null);
+
+                        debtCache.put(chatId, cachedDebt);
+
+                        chatStates.put(chatId, ChatState.SAVING_DEBT);
+                        handleStatefulMessage(update);
+                        break;
+                    case "голанг говно":
+                        golangIsShit(chatId);
+
+                        break;
 
                     default:
                         sendMessage(chatId, "Данная команда не поддерживается");
@@ -111,6 +124,11 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                 callbackData = "CHANGE_DEBT_DESCRIPTION";
             }
+            if(callbackData.startsWith("DISABLE_NOTIFICATIONS")){
+                debtId = Long.parseLong(callbackData.substring(21));
+
+                callbackData = "DISABLE_NOTIFICATIONS";
+            }
 
 
             switch (callbackData){
@@ -131,8 +149,41 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                 case "CHANGE_DEBT_DESCRIPTION":
                     buttonChangeDebtDescriptionPressed(chatId, messageId, debtId, update);
+                    break;
+                case "DISABLE_NOTIFICATIONS":
+                    buttonDisableNotificationsPressed(chatId, messageId, debtId);
+                    break;
             }
         }
+    }
+
+    private void golangIsShit(long chatId) {
+       sendMessage(chatId, "Total users: " + debtOwnerService.countAllUsers());
+       firstKeyboardMessage(chatId);
+    }
+
+
+    private void buttonDisableNotificationsPressed(long chatId, long messageId, long debtId) {
+        Debt debt = debtService.getDebtById(debtId);
+
+        debt.setNotificate(!debt.isNotificate());
+        if(isEnglish){
+            if(debt.isNotificate()){
+                sendMessage(chatId, BotMessagesEN.NOTIFICATIONS_ABLED);
+            } else {
+                sendMessage(chatId, BotMessagesEN.NOTIFICATIONS_DISABLED);
+            }
+        }
+        else {
+            if(debt.isNotificate()){
+                sendMessage(chatId, BotMessagesRU.NOTIFICATIONS_ABLED);
+            } else {
+                sendMessage(chatId, BotMessagesRU.NOTIFICATIONS_DISABLED);
+            }
+        }
+        debtService.addNewDebt(debt);
+
+        firstKeyboardMessage(chatId);
     }
 
     private void buttonChangeDebtDescriptionPressed(long chatId, long messageId, long debtId, Update update) {
@@ -282,11 +333,28 @@ public class TelegramBot extends TelegramLongPollingBot {
                     cachedDebt.setCurrency(messageText);
                     debtCache.put(chatId, cachedDebt);
                     chatStates.put(chatId, ChatState.AWAITING_DEBT_DESCRIPTION);
+
+                    SendMessage message = new SendMessage();
+                    message.setChatId(String.valueOf(chatId));
+
+                    List<String> buttons = new ArrayList<>();
                     if (isEnglish) {
-                        sendMessage(chatId, BotMessagesEN.SEND_DEBT_DESCRIBTION);
+                        buttons.add("Skip");
+                        message.setText(BotMessagesEN.SEND_DEBT_DESCRIBTION);
                     } else {
-                        sendMessage(chatId, BotMessagesRU.SEND_DEBT_DESCRIBTION);
+                        buttons.add("Пропустить");
+                        message.setText(BotMessagesRU.SEND_DEBT_DESCRIBTION);
                     }
+                    ReplyKeyboardMarkup replyKeyboardMarkup = getReplyKeyboardMarkup(buttons, 1);
+                    message.setReplyMarkup(replyKeyboardMarkup);
+
+                    try {
+                        execute(message);
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
                 } else {
                     if (isEnglish) {
                         sendMessage(chatId, BotMessagesEN.CHOOSE_CURRENCY_FROM_BUTTONS);
@@ -298,7 +366,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             case AWAITING_DEBT_DESCRIPTION -> {
                 Debt cachedDebt = debtCache.get(chatId);
-                if (messageText.equals("-")) {
+                if (messageText.equals("Пропустить") || messageText.equals("Skip")) {
                     cachedDebt.setDebtDescription(null);
                 } else {
                     cachedDebt.setDebtDescription(messageText);
@@ -311,7 +379,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             case SAVING_DEBT -> {
                 Debt cachedDebt = debtCache.get(chatId);
                 debtService.addNewDebt(cachedDebt);
-
                 if (isEnglish) {
                     sendMessage(chatId, BotMessagesEN.ADDED_DEBT);
                 } else {
@@ -337,6 +404,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
 
                 List<Debt> allDebts = debtService.getAllDebts(debtOwner);
+                if(allDebts.isEmpty()){
+                    if (isEnglish) {
+                        sendMessage(chatId, BotMessagesEN.ADD_DEBT);
+                    } else {
+                        sendMessage(chatId, BotMessagesRU.ADD_DEBT);
+                    }
+                    chatStates.put(chatId, ChatState.AWAITING_COMMAND);
+                    break;
+                }
 
                 for (int i = 0; i < allDebts.size(); i++) {
                     Debt debt = allDebts.get(i);
@@ -345,22 +421,48 @@ public class TelegramBot extends TelegramLongPollingBot {
                     String currency = debt.getCurrency();
                     String description = debt.getDebtDescription();
 
+
                     StringBuilder message;
                     if (isEnglish) {
+                        String notifications;
+                        if(debt.isNotificate()){
+                            notifications = "able";
+                        } else {
+                            notifications = "disable";
+                        }
+
                         message = new StringBuilder(String.format(BotMessagesEN.INFO_ABOUT_DEBT, i + 1,
-                                debtorUsername, sum, currency, description != null ? description : "-"));
+                                debtorUsername, sum, currency, description != null ? description : "-", notifications));
                     } else {
-                        message = new StringBuilder(String.format(BotMessagesRU.INFO_ABOUT_DEBT, i + 1, debtorUsername, sum, currency, description != null ? description : "-"));
+                        String notifications;
+                        if(debt.isNotificate()){
+                            notifications = "включены";
+                        } else {
+                            notifications = "выключены";
+                        }
+                        message = new StringBuilder(String.format(BotMessagesRU.INFO_ABOUT_DEBT, i + 1,
+                                debtorUsername, sum, currency, description != null ? description : "-", notifications));
                     }
                         HashMap<String, String> buttons = new HashMap<>();
                         if (isEnglish) {
                             buttons.put("Delete", "DELETE_DEBT_" + debt.getId());
                             buttons.put("Edit debt sum", "CHANGE_DEBT_SUM" + debt.getId());
                             buttons.put("Edit debt describtion", "CHANGE_DEBT_DESCRIPTION" + debt.getId());
+                            if (debt.isNotificate()){
+                                buttons.put("Disable notifications", "DISABLE_NOTIFICATIONS" + debt.getId());
+                            }
+                            else {
+                                buttons.put("Able notifications", "DISABLE_NOTIFICATIONS" + debt.getId());
+                            }
                         } else {
                             buttons.put("Удалить", "DELETE_DEBT_" + debt.getId());
                             buttons.put("Изменить сумму долга", "CHANGE_DEBT_SUM" + debt.getId());
                             buttons.put("Изменить описание", "CHANGE_DEBT_DESCRIPTION" + debt.getId());
+                            if (debt.isNotificate()){
+                                buttons.put("Отключить уведомления", "DISABLE_NOTIFICATIONS" + debt.getId());
+                            } else {
+                                buttons.put("Включить уведомления", "DISABLE_NOTIFICATIONS" + debt.getId());
+                            }
                         }
 
                         InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboard(buttons, 2);

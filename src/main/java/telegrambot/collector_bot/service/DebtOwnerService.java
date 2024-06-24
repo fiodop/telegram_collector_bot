@@ -23,4 +23,7 @@ public class DebtOwnerService {
     public void addNewDebtOwner(DebtOwner debtOwner) {
         debtOwnerRepository.save(debtOwner);
     }
+    public long countAllUsers(){
+        return debtOwnerRepository.count();
+    }
 }

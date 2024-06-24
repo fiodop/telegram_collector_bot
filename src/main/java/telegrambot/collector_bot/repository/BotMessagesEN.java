@@ -11,7 +11,7 @@ public interface BotMessagesEN {
     It's a convenient tool for maintaining financial discipline and ensuring timely repayment.
     """;
 
-    String SEND_DEBT_DESCRIBTION = "Send a description of the debt (if there is none, then '-')";
+    String SEND_DEBT_DESCRIBTION = "Send a description of the debt";
     String SEND_DEBT_SUM = "Send the amount of debt";
     String DEBT_DELETED = "Debt deleted successfully";
     String SEND_USERNAME = "Send debtor's @username";
@@ -28,5 +28,8 @@ public interface BotMessagesEN {
                Сумма: %d
                Валюта: %s
                Описание: %s
+               Notification: %s
             """;
+    String NOTIFICATIONS_ABLED = "Notifications abled";
+    String NOTIFICATIONS_DISABLED = "Notifications disabled";
 }

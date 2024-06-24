@@ -21,6 +21,7 @@ public class Debt {
     private int debt;
     private String currency;
     private String debtDescription;
+    private boolean notificate;
     private ZonedDateTime dateTime;
 
     @ManyToOne
