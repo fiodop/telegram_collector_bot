@@ -30,6 +30,6 @@ public interface BotMessagesEN {
                Описание: %s
                Notification: %s
             """;
-    String NOTIFICATIONS_ABLED = "Notifications abled";
+    String NOTIFICATIONS_ABLED = "Notifications enabled";
     String NOTIFICATIONS_DISABLED = "Notifications disabled";
 }

@@ -428,7 +428,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         if(debt.isNotificate()){
                             notifications = "able";
                         } else {
-                            notifications = "disable";
+                            notifications = "disabled";
                         }
 
                         message = new StringBuilder(String.format(BotMessagesEN.INFO_ABOUT_DEBT, i + 1,
