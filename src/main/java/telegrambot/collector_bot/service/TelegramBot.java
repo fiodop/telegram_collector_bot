@@ -88,7 +88,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                     case "Пропустить", "Skip":
                         Debt cachedDebt = debtCache.get(chatId);
-                        cachedDebt.setDebtDescription(null);
+                        cachedDebt.setDescription(null);
 
                         debtCache.put(chatId, cachedDebt);
 
@@ -97,7 +97,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                         break;
                     case "голанг говно":
                         golangIsShit(chatId);
-
                         break;
 
                     default:
@@ -176,16 +175,16 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void buttonDisableNotificationsPressed(long chatId, long debtId) {
         Debt debt = debtService.getDebtById(debtId);
 
-        debt.setNotificate(!debt.isNotificate());
+        debt.setNotify(!debt.isNotify());
         if(isEnglish){
-            if(debt.isNotificate()){
+            if(debt.isNotify()){
                 sendMessage(chatId, BotMessagesEN.NOTIFICATIONS_ABLED);
             } else {
                 sendMessage(chatId, BotMessagesEN.NOTIFICATIONS_DISABLED);
             }
         }
         else {
-            if(debt.isNotificate()){
+            if(debt.isNotify()){
                 sendMessage(chatId, BotMessagesRU.NOTIFICATIONS_ABLED);
             } else {
                 sendMessage(chatId, BotMessagesRU.NOTIFICATIONS_DISABLED);
@@ -328,7 +327,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                 }
                 Debt cachedDebt = debtCache.get(chatId);
-                cachedDebt.setDebt(debtSum);
+                cachedDebt.setDebtAmount(debtSum);
 
                 debtCache.put(chatId, cachedDebt);
                 chatStates.put(chatId, ChatState.AWAITING_DEBT_CURRENCY);
@@ -386,9 +385,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             case AWAITING_DEBT_DESCRIPTION -> {
                 Debt cachedDebt = debtCache.get(chatId);
                 if (messageText.equals("Пропустить") || messageText.equals("Skip")) {
-                    cachedDebt.setDebtDescription(null);
+                    cachedDebt.setDescription(null);
                 } else {
-                    cachedDebt.setDebtDescription(messageText);
+                    cachedDebt.setDescription(messageText);
                 }
 
                 debtCache.put(chatId, cachedDebt);
@@ -437,15 +436,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                 for (int i = 0; i < allDebts.size(); i++) {
                     Debt debt = allDebts.get(i);
                     String debtorUsername = debt.getUsername();
-                    int sum = debt.getDebt();
+                    int sum = debt.getDebtAmount();
                     String currency = debt.getCurrency();
-                    String description = debt.getDebtDescription();
+                    String description = debt.getDescription();
 
 
                     StringBuilder message;
                     if (isEnglish) {
                         String notifications;
-                        if(debt.isNotificate()){
+                        if(debt.isNotify()){
                             notifications = "able";
                         } else {
                             notifications = "disabled";
@@ -455,7 +454,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 debtorUsername, sum, currency, description != null ? description : "-", notifications));
                     } else {
                         String notifications;
-                        if(debt.isNotificate()){
+                        if(debt.isNotify()){
                             notifications = "включены";
                         } else {
                             notifications = "выключены";
@@ -468,7 +467,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             buttons.put("Delete", "DELETE_DEBT_" + debt.getId());
                             buttons.put("Edit debt sum", "CHANGE_DEBT_SUM" + debt.getId());
                             buttons.put("Edit debt describtion", "CHANGE_DEBT_DESCRIPTION" + debt.getId());
-                            if (debt.isNotificate()){
+                            if (debt.isNotify()){
                                 buttons.put("Disable notifications", "DISABLE_NOTIFICATIONS" + debt.getId());
                             }
                             else {
@@ -478,7 +477,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             buttons.put("Удалить", "DELETE_DEBT_" + debt.getId());
                             buttons.put("Изменить сумму долга", "CHANGE_DEBT_SUM" + debt.getId());
                             buttons.put("Изменить описание", "CHANGE_DEBT_DESCRIPTION" + debt.getId());
-                            if (debt.isNotificate()){
+                            if (debt.isNotify()){
                                 buttons.put("Отключить уведомления", "DISABLE_NOTIFICATIONS" + debt.getId());
                             } else {
                                 buttons.put("Включить уведомления", "DISABLE_NOTIFICATIONS" + debt.getId());
@@ -513,7 +512,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         break;
                     }
                     Debt cachedDebt = debtCache.get(chatId);
-                    cachedDebt.setDebt(debtSum);
+                    cachedDebt.setDebtAmount(debtSum);
                     debtService.addNewDebt(cachedDebt);
                     if (isEnglish) {
                         sendMessage(chatId, BotMessagesEN.DEBT_SUM_EDITED);
@@ -529,9 +528,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case CHANGE_DEBT_DESCRIPTION -> {
                     Debt cachedDebt = debtCache.get(chatId);
                     if (messageText.equals("-")) {
-                        cachedDebt.setDebtDescription(null);
+                        cachedDebt.setDescription(null);
                     } else {
-                        cachedDebt.setDebtDescription(messageText);
+                        cachedDebt.setDescription(messageText);
                     }
                     debtService.addNewDebt(cachedDebt);
                     if (isEnglish) {
@@ -733,9 +732,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             firstKeyboardMessage(chatId);
         }
 
-        public void inlineKeyboardButtonExecution () {
 
-        }
 
 
 }

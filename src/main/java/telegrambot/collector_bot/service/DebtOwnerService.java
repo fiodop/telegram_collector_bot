@@ -1,7 +1,6 @@
 package telegrambot.collector_bot.service;
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import telegrambot.collector_bot.entity.DebtOwner;
 import telegrambot.collector_bot.repository.entities.DebtOwnerRepository;
@@ -14,7 +13,7 @@ public class DebtOwnerService {
 
     public DebtOwner findByUsername(String telegramUsername){
         try {
-            return debtOwnerRepository.findByTelegramUsername(telegramUsername);
+            return debtOwnerRepository.findByUsername(telegramUsername);
         } catch (Exception e){
             return null;
         }
