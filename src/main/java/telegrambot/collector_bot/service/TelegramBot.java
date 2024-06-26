@@ -162,7 +162,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void buttonCancelPressed(long chatId) {
         debtCache.remove(chatId);
-        chatStates.put(chatId, ChatState.AWAITING_COMMAND);
+        chatStates.remove(chatId);
         firstKeyboardMessage(chatId);
     }
 
@@ -404,7 +404,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(chatId, BotMessagesRU.ADDED_DEBT);
                 }
                 firstKeyboardMessage(chatId);
-                chatStates.put(chatId, ChatState.AWAITING_COMMAND);
+                chatStates.remove(chatId);
 
                 debtCache.remove(chatId);
             }
@@ -418,7 +418,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } else {
                         sendMessage(chatId, BotMessagesRU.ADD_DEBT);
                     }
-                    chatStates.put(chatId, ChatState.AWAITING_COMMAND);
+                    chatStates.remove(chatId);
                     break;
                 }
 
@@ -495,7 +495,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
 
 
-                    chatStates.put(chatId, ChatState.AWAITING_COMMAND);
+                 chatStates.remove(chatId);
                 }
                 //Изменение суммы долга
                 case CHANGE_DEBT_SUM -> {
