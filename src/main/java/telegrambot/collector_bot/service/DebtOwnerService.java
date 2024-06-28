@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import telegrambot.collector_bot.entity.DebtOwner;
 import telegrambot.collector_bot.repository.entities.DebtOwnerRepository;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class DebtOwnerService {
@@ -24,5 +26,9 @@ public class DebtOwnerService {
     }
     public long countAllUsers(){
         return debtOwnerRepository.count();
+    }
+
+    public List<DebtOwner> getAllDebtOwners() {
+        return debtOwnerRepository.findAll();
     }
 }

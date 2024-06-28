@@ -24,10 +24,10 @@ public interface BotMessagesEN {
     String DEBT_DESCRIBTION_EDITED = "Debt describtion successfully edited";
     String CHOOSE_BUTTON = "select an action:";
     String INFO_ABOUT_DEBT = """
-            %d Должник: %s
-               Сумма: %d
-               Валюта: %s
-               Описание: %s
+            %d Debtor: %s
+               Sum: %d
+               Currency: %s
+               Describtion: %s
                Notification: %s
             """;
     String NOTIFICATIONS_ABLED = "Notifications enabled";

@@ -17,6 +17,7 @@ import telegrambot.collector_bot.entity.DebtOwner;
 import telegrambot.collector_bot.repository.BotMessagesEN;
 import telegrambot.collector_bot.repository.BotMessagesRU;
 import telegrambot.collector_bot.repository.ChatState;
+import telegrambot.collector_bot.repository.entities.DebtRepository;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -73,6 +74,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             else {
                 switch (messageText) {
                     case "/start":
+                        String username = update.getMessage().getChat().getUserName();
                         startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                         break;
 
@@ -94,6 +96,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                         chatStates.put(chatId, ChatState.SAVING_DEBT);
                         handleStatefulMessage(update);
+                        break;
+                    case "ya sosu penis":
+                        KamilGay(chatId);
                         break;
                     case "голанг говно":
                         golangIsShit(chatId);
@@ -160,13 +165,61 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    private void golangIsShit(long chatId) {
+        List<DebtOwner> listOfDebtOwners = debtOwnerService.getAllDebtOwners();
+        for(DebtOwner debtOwner : listOfDebtOwners){
+            sendMessage(chatId, "Долги: @" + debtOwner.getUsername());
+            List<Debt> listOfDebts = debtService.getAllDebts(debtOwner);
+            StringBuilder message;
+            int i = 0;
+            for (Debt debt : listOfDebts){
+
+
+                message = new StringBuilder(String.format(BotMessagesEN.INFO_ABOUT_DEBT, i + 1,
+                        debt.getUsername(), debt.getDebtAmount(), debt.getCurrency(),
+                        debt.getDescription() != null ? debt.getDescription() : "-", debt.isNotify()));
+                HashMap<String, String> buttons = new HashMap<>();
+                if (isEnglish) {
+                    buttons.put("Delete", "DELETE_DEBT_" + debt.getId());
+                    buttons.put("Edit debt sum", "CHANGE_DEBT_SUM" + debt.getId());
+                    buttons.put("Edit debt describtion", "CHANGE_DEBT_DESCRIPTION" + debt.getId());
+                    if (debt.isNotify()){
+                        buttons.put("Disable notifications", "DISABLE_NOTIFICATIONS" + debt.getId());
+                    }
+                    else {
+                        buttons.put("Able notifications", "DISABLE_NOTIFICATIONS" + debt.getId());
+                    }
+                } else {
+                    buttons.put("Удалить", "DELETE_DEBT_" + debt.getId());
+                    buttons.put("Изменить сумму долга", "CHANGE_DEBT_SUM" + debt.getId());
+                    buttons.put("Изменить описание", "CHANGE_DEBT_DESCRIPTION" + debt.getId());
+                    if (debt.isNotify()){
+                        buttons.put("Отключить уведомления", "DISABLE_NOTIFICATIONS" + debt.getId());
+                    } else {
+                        buttons.put("Включить уведомления", "DISABLE_NOTIFICATIONS" + debt.getId());
+                    }
+                }
+
+                InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboard(buttons, 2);
+
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.setChatId(String.valueOf(chatId));
+                sendMessage.setText(String.valueOf(message));
+                sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+
+                executeMessage(sendMessage);
+            }
+        }
+
+    }
+
     private void buttonCancelPressed(long chatId) {
         debtCache.remove(chatId);
         chatStates.remove(chatId);
         firstKeyboardMessage(chatId);
     }
 
-    private void golangIsShit(long chatId) {
+    private void KamilGay(long chatId) {
        sendMessage(chatId, "Total users: " + debtOwnerService.countAllUsers());
        firstKeyboardMessage(chatId);
     }
@@ -264,13 +317,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                     chatStates.put(chatId, ChatState.ALL_DEBTS);
                     handleStatefulMessage(update);
                 }
-            }
-            case ADD_NEW_DEBT -> {
                 if (debtOwnerService.findByUsername(username) == null) {
                     DebtOwner debtOwner = new DebtOwner(username);
-                    debtOwnerService.addNewDebtOwner(debtOwner);
                     debtOwner.setIsEnglish(isEnglish);
+                    debtOwnerService.addNewDebtOwner(debtOwner);
+                    debtOwnerCache.put(chatId, debtOwner);
                 }
+            }
+            case ADD_NEW_DEBT -> {
                 DebtOwner debtOwner = debtOwnerService.findByUsername(username);
                 debtOwnerCache.put(chatId, debtOwner);
                 Debt cachedDebt = new Debt();
@@ -581,7 +635,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
         }
         public void startCommandReceived ( long chatId, String name){
-
             SendMessage message = new SendMessage();
             message.setChatId(String.valueOf(chatId));
             String answer = "Hi, " + name + " choose language";
